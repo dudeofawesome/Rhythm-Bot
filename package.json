@@ -1,16 +1,19 @@
 {
-  "name": "rhythm-bot",
-  "version": "2.1.5",
-  "description": "",
-  "main": "dist/app.js",
-  "scripts": {
+    "name": "rhythm-bot",
+    "version": "2.1.5",
+    "description": "",
+    "main": "dist/app.js",
+    "scripts": {
     "start": "NODE_ENV=development node --inspect --trace-warnings -r ts-node/register -r tsconfig-paths/register src/app",
     "start:dev": "NODE_ENV=development nodemon --inspect --trace-warnings",
     "start:prod": "NODE_ENV=production node --trace-warnings dist/app",
     "build": "tsc"
-  },
-  "author": "Malexion",
-  "license": "ISC",
+    },
+    "author": "Malexion",
+    "license": "MIT",
+    "repository": {
+        "url": "https://github.com/Malexion/Rhythm-Bot"
+    },
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
     "@mikro-orm/core": "^4.5.9",
