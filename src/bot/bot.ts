@@ -27,7 +27,6 @@ export class RhythmBot extends IBot<IRhythmBotConfig> {
     helptext: string;
     player: MediaPlayer;
     status: BotStatus;
-    playlistItemRepo: EntityRepository<MediaItem> = ORM.em.getRepository(MediaItem);
 
     constructor(config: IRhythmBotConfig) {
         super(config, <IRhythmBotConfig>{
@@ -152,13 +151,11 @@ export class RhythmBot extends IBot<IRhythmBotConfig> {
                     for (const arg in cmd.arguments) {
                         let parts = arg.split(':');
                         if (parts.length == 2) {
-                            await this.player.addMedia(
-                                ORM.em.create(MediaItem, {
-                                    type: parts[0],
-                                    url: parts[1],
-                                    requestor: msg.author.username,
-                                })
-                            );
+                            await this.player.addMedia({
+                                type: parts[0],
+                                url: parts[1],
+                                requestor: msg.author.username,
+                            });
                         } else {
                             msg.channel.send(createErrorEmbed(`Invalid media type format`));
                         }
@@ -261,13 +258,11 @@ export class RhythmBot extends IBot<IRhythmBotConfig> {
                     if (embed) {
                         if (reaction.emoji.name === this.config.emojis.addSong && embed.url) {
                             this.logger.debug(`Emoji Click: Adding Media: ${embed.url}`);
-                            this.player.addMedia(
-                                ORM.em.create(MediaItem, {
-                                    type: 'youtube',
-                                    url: embed.url,
-                                    requestor: user.username,
-                                })
-                            );
+                            this.player.addMedia({
+                                type: 'youtube',
+                                url: embed.url,
+                                requestor: user.username,
+                            });
                         }
                         if (reaction.emoji.name === this.config.emojis.stopSong) {
                             this.logger.debug('Emoji Click: Stopping Song');
