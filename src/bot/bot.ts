@@ -14,18 +14,20 @@ import {
     MessageReaction,
     User,
 } from 'discord-bot-quickstart';
-import * as yts from 'yt-search';
+import { search as yts } from 'yt-search';
+import { EntityRepository } from '@mikro-orm/sqlite';
+import { ORM } from '../app';
+import { MediaItem } from '../media/media-item.model';
 
 const helptext = readFile('../helptext.txt');
-const random = (array) => {
-    return array[Math.floor(Math.random() * array.length)];
-};
+const random = (array) => array[Math.floor(Math.random() * array.length)];
 const pingPhrases = [`Can't stop won't stop!`, `:ping_pong: Pong Bitch!`];
 
 export class RhythmBot extends IBot<IRhythmBotConfig> {
     helptext: string;
     player: MediaPlayer;
     status: BotStatus;
+    playlistItemRepo: EntityRepository<MediaItem> = ORM.em.getRepository(MediaItem);
 
     constructor(config: IRhythmBotConfig) {
         super(config, <IRhythmBotConfig>{
@@ -137,11 +139,13 @@ export class RhythmBot extends IBot<IRhythmBotConfig> {
                     for (const arg in cmd.arguments) {
                         let parts = arg.split(':');
                         if (parts.length == 2) {
-                            await this.player.addMedia({
-                                type: parts[0],
-                                url: parts[1],
-                                requestor: msg.author.username,
-                            });
+                            await this.player.addMedia(
+                                ORM.em.create(MediaItem, {
+                                    type: parts[0],
+                                    url: parts[1],
+                                    requestor: msg.author.username,
+                                })
+                            );
                         } else {
                             msg.channel.send(createErrorEmbed(`Invalid media type format`));
                         }
@@ -244,11 +248,13 @@ export class RhythmBot extends IBot<IRhythmBotConfig> {
                     if (embed) {
                         if (reaction.emoji.name === this.config.emojis.addSong && embed.url) {
                             this.logger.debug(`Emoji Click: Adding Media: ${embed.url}`);
-                            this.player.addMedia({
-                                type: 'youtube',
-                                url: embed.url,
-                                requestor: user.username,
-                            });
+                            this.player.addMedia(
+                                ORM.em.create(MediaItem, {
+                                    type: 'youtube',
+                                    url: embed.url,
+                                    requestor: user.username,
+                                })
+                            );
                         }
                         if (reaction.emoji.name === this.config.emojis.stopSong) {
                             this.logger.debug('Emoji Click: Stopping Song');

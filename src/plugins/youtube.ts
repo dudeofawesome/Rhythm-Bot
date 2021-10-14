@@ -11,8 +11,10 @@ import {
     IBotConfig,
 } from 'discord-bot-quickstart';
 import { Readable } from 'stream';
-import * as ytdl from 'ytdl-core';
-import * as ytpl from 'ytpl';
+import ytdl from 'ytdl-core';
+import { getInfo } from 'ytdl-core';
+import ytpl from 'ytpl';
+import { ORM } from '../app';
 
 const youtubeType: string = 'youtube';
 
@@ -28,11 +30,13 @@ export default class YoutubePlugin extends IBotPlugin {
         map.on(youtubeType, (cmd: SuccessfulParsedMessage<Message>, msg: Message) => {
             if (cmd.arguments.length > 0) {
                 cmd.arguments.forEach((arg) => {
-                    this.bot.player.addMedia({
-                        type: youtubeType,
-                        url: arg,
-                        requestor: msg.author.username,
-                    });
+                    this.bot.player.addMedia(
+                        ORM.em.create(MediaItem, {
+                            type: youtubeType,
+                            url: arg,
+                            requestor: msg.author.username,
+                        })
+                    );
 
                     if (!this.bot.player.playing) {
                         this.bot.joinChannelAndPlay(msg);
@@ -61,7 +65,7 @@ export default class YoutubePlugin extends IBotPlugin {
             getDetails: (item: MediaItem) =>
                 new Promise<MediaItem>((done, error) => {
                     item.url = item.url.includes('://') ? item.url : `https://www.youtube.com/watch?v=${item.url}`;
-                    ytdl.getInfo(item.url)
+                    getInfo(item.url)
                         .then((info) => {
                             item.name = info.videoDetails.title ? info.videoDetails.title : 'Unknown';
                             item.duration = secondsToTimestamp(parseInt(info.videoDetails.lengthSeconds) || 0);
